@@ -27,14 +27,14 @@ namespace Level1
             var matrix = GenerateMatrix(7, 4, (-10, 10));
             PrintMatrix(matrix);
             Console.WriteLine("Минимальные элементы строк матрицы:");
-            foreach (var i in MinElementsOfMatrix(matrix, Direction.Columns))
+            foreach (var i in MinElementsOf(matrix, Direction.Rows))
             {
                 Console.Write($"{i} ");
             }
             Console.WriteLine();
             
             Console.WriteLine("Индексы минимальных элементов строк матрицы:");
-            foreach (var i in IndexesOfMatrix(matrix, Function.Min, Direction.Columns))
+            foreach (var i in IndexesOf(matrix, Function.Min, Direction.Rows))
             {
                 Console.Write($"{i} ");
             }
@@ -45,7 +45,7 @@ namespace Level1
             int[,] matrix = GenerateMatrix(5, 7, (-10, 10));
             PrintMatrix(matrix);
             
-            int index = IndexesOfMatrix(matrix, Function.Min, Direction.Columns)[0];
+            int index = IndexesOf(matrix, Function.Min, Direction.Columns)[0];
             Console.WriteLine($"Индекс строки с минимальным элементом в 1-м столбце: {index}");
             matrix = DeletePartOfMatrix(matrix, Direction.Rows, index);
             PrintMatrix(matrix);
@@ -60,7 +60,7 @@ namespace Level1
             int[,] matrix = GenerateMatrix(5, 7, (-10, 10));
             PrintMatrix(matrix);
             
-            int[] indexes = IndexesOfMatrix(matrix, Function.Max, Direction.Rows);
+            int[] indexes = IndexesOf(matrix, Function.Max, Direction.Rows);
             for (var i = 0; i < matrix.GetLength(0); i++)
             {
                 for (int j = indexes[i] + 1; j < matrix.GetLength(1); j++)
@@ -74,7 +74,7 @@ namespace Level1
             matrix = ApplyFuncToMatrix(matrix, t => 0, Direction.Columns, 6);
             PrintMatrix(matrix);
             
-            int[] maxElements = MaxElementsOfMatrix(matrix, Direction.Rows);
+            int[] maxElements = MaxElementsOf(matrix, Direction.Rows);
             for (var i = 0; i < matrix.GetLength(0); i++)
             {
                 matrix[i, matrix.GetLength(1) - 2] = maxElements[i];
@@ -90,7 +90,7 @@ namespace Level1
             int[] vector = GenerateArray(7, (-10, 10));
             PrintArray(vector);
             
-            int index = IndexesOfMatrix(matrix, Function.Max, Direction.Columns)[5];
+            int index = IndexesOf(matrix, Function.Max, Direction.Columns)[5];
             Console.WriteLine($"Индекс строки с максимальным элементом в 6-м столбце: {index}\n");
             for (var i = 0; i < matrix.GetLength(1); i++)
             {
@@ -111,7 +111,7 @@ namespace Level1
             int[] vector = GenerateArray(5, (-10, 10));
             PrintArray(vector);
             
-            int index = IndexesOfMatrix(matrix, Function.Min, Direction.Rows)[4];
+            int index = IndexesOf(matrix, Function.Min, Direction.Rows)[4];
             Console.WriteLine($"Индекс столбца с минимальным элементом в 5-й строке: {index}\n");
             for (var i = 0; i < matrix.GetLength(0); i++)
             {
@@ -157,7 +157,7 @@ namespace Level1
 
             return matrix;
         }
-        static int[] MinElementsOfMatrix(int[,] matrix, Direction direction)
+        static int[] MinElementsOf(int[,] matrix, Direction direction)
         {
             if (direction == Direction.Rows)
             {
@@ -194,7 +194,7 @@ namespace Level1
                 return min;
             }
         }
-        static int[] MaxElementsOfMatrix(int[,] matrix, Direction direction)
+        static int[] MaxElementsOf(int[,] matrix, Direction direction)
         {
             if (direction == Direction.Rows)
             {
@@ -231,9 +231,9 @@ namespace Level1
                 return max;
             }
         }
-        static int[] IndexesOfMatrix(int[,] matrix, Function function, Direction direction)
+        static int[] IndexesOf(int[,] matrix, Function function, Direction direction)
         {
-            int[] min = function == Function.Min ? MinElementsOfMatrix(matrix, direction) : MaxElementsOfMatrix(matrix, direction);
+            int[] min = function == Function.Min ? MinElementsOf(matrix, direction) : MaxElementsOf(matrix, direction);
             int[] indexes;
             if (direction == Direction.Rows)
             {
@@ -267,6 +267,26 @@ namespace Level1
             }
             return indexes;
         }
+        static int[] CountOf(int[,] matrix, Sign sign, Direction direction)
+        {
+            int[] count = new int[direction == Direction.Rows ? matrix.GetLength(0) : matrix.GetLength(1)];
+            for (int i = 0; i < count.Length; i++)
+            {
+                for (int j = 0; j < (direction == Direction.Rows ? matrix.GetLength(1) : matrix.GetLength(0)); j++)
+                {
+                    if (sign == Sign.Positive && matrix[direction == Direction.Rows ? i : j, direction == Direction.Rows ? j : i] > 0)
+                    {
+                        count[i]++;
+                    }
+                    else if (sign == Sign.Negative && matrix[direction == Direction.Rows ? i : j, direction == Direction.Rows ? j : i] < 0)
+                    {
+                        count[i]++;
+                    }
+                }
+            }
+
+            return count;
+        }
         static int[,] GenerateMatrix(int n, int m, (int, int) range)
         {
             int[,] matrix = new int[n, m];
@@ -280,6 +300,18 @@ namespace Level1
             }
             return matrix;
         }
+        static int[,] GenerateUnitMatrix(int n)
+        {
+            int[,] matrix = new int[n, n];
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    matrix[i, j] = i == j ? 1 : 0;
+                }
+            }
+            return matrix;
+        }
         static int[] GenerateArray(int i, (int, int) range)
         {
             int[] vector = new int[i];
@@ -289,6 +321,17 @@ namespace Level1
                 vector[j] = random.Next(range.Item1, range.Item2 + 1);
             }
             return vector;
+        }
+        static int[,] SwapPartOfMatrix(int[,] matrix, Direction direction, int index1, int index2)
+        {
+            if (direction == Direction.Rows)
+                for (int i = 0; i < matrix.GetLength(1); i++)
+                    (matrix[index1, i], matrix[index2, i]) = (matrix[index2, i], matrix[index1, i]);
+            else
+                for (int i = 0; i < matrix.GetLength(0); i++)
+                    (matrix[i, index1], matrix[i, index2]) = (matrix[i, index2], matrix[i, index1]);
+            
+            return matrix;
         }
         static int[,] DeletePartOfMatrix(int[,] matrix, Direction direction, int index)
         {
@@ -387,5 +430,10 @@ namespace Level1
     {
         Min,
         Max
+    }
+    enum Sign
+    {
+        Negative,
+        Positive
     }
 }
